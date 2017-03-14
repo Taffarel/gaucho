@@ -64,7 +64,10 @@ def id_of (name=""):
    """
 
    service = get(HOST + "/services?name=" + name).json()
-   return service['data'][0]['id']
+
+   id_of = [str(rancher_service['id']) for rancher_service in service['data']]
+
+   return id_of
 
 
 
