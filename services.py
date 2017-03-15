@@ -62,15 +62,48 @@ def query(service_id=""):
 def id_of (name=""):
    """Retrieves the ID of a service, given its name.
    """
-
    service = get(HOST + "/services?name=" + name).json()
 
-   id_of = [str(rancher_service['id']) for rancher_service in service['data']]
+   return [str(rancher_service['id']) for rancher_service in service['data']]
 
-   return id_of
+#
+# Take action in your services!
+#
+@baker.command(params={
+    "service_id": "The ID of the service to activate", 
+    "action": "The action used to the service"
+    })
+def service_action(service_id, action):
+    """
+    Take action in your services
+    """
+    service = post(HOST + "/services/" + service_id + "?action=" + action, "")
+
+    return print_json(service.json())
+
+#
+# Get all services from blue-green stack
+#
+@baker.command(params={"name":"The name of the service to lookup."})
+def get_service_blue_green(name=""):
+    """
+    Get all services that correspond to Blue-Green Deployment manner
+    """
+    service = get(HOST + "/services?name=" + name).json()
+
+    return print_json([get_list_of_services(rancher_service) for rancher_service in service['data'] if rancher_service['kind'] != "loadBalancerService"])
 
 
+def get_list_of_services(rancher_service):
+    """Return a list of data to help 'get_service_blue_green' method
+    """
+    services = {
+        'state':str(rancher_service['state']),
+        'id':str(rancher_service['id']), 
+        'Deployment':str(rancher_service['data']['fields']['launchConfig']['labels']['io.rancher.service.deployment.unit']),
+    }
 
+    return services
 #
 # Start containers within a service (e.g. for Start Once containers).
 #
