@@ -79,7 +79,7 @@ def service_action(service_id, action):
     """
     service = post(HOST + "/services/" + service_id + "?action=" + action, "")
 
-    return print_json(service.json())
+    return print_json(service)
 
 #
 # Get all services from blue-green stack
