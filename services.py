@@ -7,7 +7,6 @@ import time
 import websocket
 import base64
 import asyncio
-from http.server import HTTPServer
 
 HOST = "http://rancher.local:8080/v1"
 URL_SERVICE = "/services/"
