@@ -124,7 +124,7 @@ def start_containers (service_id):
    containers = get(HOST + URL_SERVICE + service_id + "/instances").json()['data']
    for container in containers:
       start_url = container['actions']['start']
-      print "Starting container %s with url %s" % (container['name'], start_url)
+      print("Starting container %s with url %s" % (container['name'], start_url))
       post(start_url, "")
 
 
@@ -171,7 +171,7 @@ def upgrade(service_id, start_first=True, complete_previous=False, imageUuid=Non
 
       sleep_count = 0
       while current_service_config['state'] != "active" and sleep_count < timeout // 2:
-         print "Waiting for upgrade to finish..."
+         print("Waiting for upgrade to finish...")
          time.sleep (2)
          r = get(HOST + URL_SERVICE + service_id)
          current_service_config = r.json()
@@ -179,7 +179,7 @@ def upgrade(service_id, start_first=True, complete_previous=False, imageUuid=Non
 
    # can't upgrade a service if it's not in active state
    if current_service_config['state'] != "active":
-      print "Service cannot be updated due to its current state: %s" % current_service_config['state']
+      print("Service cannot be updated due to its current state: %s" % current_service_config['state'])
       sys.exit(1)
 
    # Stuff the current service launch config into the request for upgrade
@@ -188,59 +188,59 @@ def upgrade(service_id, start_first=True, complete_previous=False, imageUuid=Non
 
    # replace the environment variable specified (if one was)
    if replace_env_name != None and replace_env_value != None:
-      print "Replacing environment variable %s from %s to %s" % (replace_env_name, upgrade_strategy['inServiceStrategy']['launchConfig']['environment'][replace_env_name], replace_env_value)
+      print("Replacing environment variable %s from %s to %s" % (replace_env_name, upgrade_strategy['inServiceStrategy']['launchConfig']['environment'][replace_env_name], replace_env_value))
       upgrade_strategy['inServiceStrategy']['launchConfig']['environment'][replace_env_name] = replace_env_value
 
 
    if imageUuid != None:
       # place new image into config
       upgrade_strategy['inServiceStrategy']['launchConfig']['imageUuid'] = imageUuid
-      print "New Image: %s" % upgrade_strategy['inServiceStrategy']['launchConfig']['imageUuid']
+      print("New Image: %s" % upgrade_strategy['inServiceStrategy']['launchConfig']['imageUuid'])
 
    # post the upgrade request
    post(current_service_config['actions']['upgrade'], upgrade_strategy)
 
-   print "Upgrade of %s service started!" % current_service_config['name']
+   print("Upgrade of %s service started!" % current_service_config['name'])
 
    r = get(HOST + URL_SERVICE + service_id)
    current_service_config = r.json()
 
-   print "Service State '%s.'" % current_service_config['state']
+   print("Service State '%s.'" % current_service_config['state'])
 
-   print "Waiting for upgrade to finish..."
+   print("Waiting for upgrade to finish...")
    sleep_count = 0
    while current_service_config['state'] != "upgraded" and sleep_count < timeout // 2:
-         print "."
+         print(".")
          time.sleep (2)
          r = get(HOST + URL_SERVICE + service_id)
          current_service_config = r.json()
          sleep_count += 1
 
    if sleep_count >= timeout // 2:
-      print "Upgrading take to much time! Check Rancher UI for more details."
+      print("Upgrading take to much time! Check Rancher UI for more details.")
       sys.exit(1)
    else:
-      print "Upgraded"
+      print("Upgraded")
 
    if auto_complete and current_service_config['state'] == "upgraded":
       post(HOST + URL_SERVICE + service_id + "?action=finishupgrade", "")
       r = get(HOST + URL_SERVICE + service_id)
       current_service_config = r.json()
-      print "Auto Finishing Upgrade..."
+      print("Auto Finishing Upgrade...")
 
       upgraded_sleep_count = 0
       while current_service_config['state'] != "active" and upgraded_sleep_count < timeout // 2:
-         print "."
+         print(".")
          time.sleep (2)
          r = get(HOST + URL_SERVICE + service_id)
          current_service_config = r.json()
          upgraded_sleep_count += 1
 
       if current_service_config['state'] == "active":
-         print "DONE"
+         print("DONE")
 
       else:
-         print "Something has gone wrong!  Check Rancher UI for more details."
+         print("Something has gone wrong!  Check Rancher UI for more details.")
          sys.exit(1)
 
 
@@ -262,12 +262,12 @@ def execute(service_id,command):
 
   # guard we have at least one container available
   if len(containers) <= 0:
-    print "No container available"
+    print("No container available")
     sys.exit(1)
 
   # take the first (random) container to execute the command on
   execution_url = containers[0]['actions']['execute']
-  print "Executing '%s' on container '%s'" % (command, containers[0]['name'])
+  print("Executing '%s' on container '%s'" % (command, containers[0]['name']))
 
   # prepare post payload
   payload = json.loads('{"attachStdin": true,"attachStdout": true,"command": ["/bin/sh","-c"],"tty": true}')
@@ -280,9 +280,9 @@ def execute(service_id,command):
   ws_url = intermediate['url'] + "?token=" + ws_token
 
   # call websocket and print answer
-  print "> \n%s" % ws(ws_url)
+  print ("> \n%s" % ws(ws_url))
 
-  print "DONE"
+  print("DONE")
 
 
 
@@ -303,12 +303,12 @@ def logs(service_id):
 
   # guard we have at least one container available
   if len(containers) <= 0:
-    print "No container available"
+    print("No container available")
     sys.exit(1)
 
   # take the first (random) container to show the logs
   execution_url = containers[0]['actions']['logs']
-  print "Showing logs of container '%s'" % (containers[0]['name'])
+  print("Showing logs of container '%s'" % (containers[0]['name']))
 
   # prepare post payload
   payload = json.loads('{"follow": true,"lines": 100}')
@@ -321,7 +321,7 @@ def logs(service_id):
 
   logging(ws_url)
 
-  print "DONE"
+  print("DONE")
 
 #
 # Rollback the service.
@@ -339,33 +339,33 @@ def rollback(service_id, timeout=60):
 
    # can't rollback a service if it's not in upgraded state
    if current_service_config['state'] != "upgraded":
-      print "Service cannot be updated due to its current state: %s" % current_service_config['state']
+      print("Service cannot be updated due to its current state: %s" % current_service_config['state'])
       sys.exit(1)
 
    # post the rollback request
    post(current_service_config['actions']['rollback'], "");
 
-   print "Rollback of %s service started!" % current_service_config['name']
+   print("Rollback of %s service started!" % current_service_config['name'])
 
    r = get(HOST + URL_SERVICE + service_id)
    current_service_config = r.json()
 
-   print "Service State '%s.'" % current_service_config['state']
+   print("Service State '%s.'" % current_service_config['state'])
 
-   print "Waiting for rollback to finish..."
+   print("Waiting for rollback to finish...")
    sleep_count = 0
    while current_service_config['state'] != "active" and sleep_count < timeout // 2:
-         print "."
+         print(".")
          time.sleep (2)
          r = get(HOST + URL_SERVICE + service_id)
          current_service_config = r.json()
          sleep_count += 1
 
    if sleep_count >= timeout // 2:
-      print "Rolling back take to much time! Check Rancher UI for more details."
+      print("Rolling back take to much time! Check Rancher UI for more details.")
       sys.exit(1)
    else:
-      print "Rolled back"
+      print("Rolled back")
 
 #
 # Script's entry point, starts Baker to execute the commands.
