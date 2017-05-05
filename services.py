@@ -164,7 +164,7 @@ def upgrade(service_id, start_first=True, complete_previous=False, imageUuid=Non
 
    # complete previous upgrade flag on
    if complete_previous and current_service_config['state'] == "upgraded":
-      print "Previous service upgrade wasn't completed, completing it now..."
+      print("Previous service upgrade wasn't completed, completing it now...")
       post(HOST + URL_SERVICE + service_id + "?action=finishupgrade", "")
       r = get(HOST + URL_SERVICE + service_id)
       current_service_config = r.json()
@@ -365,7 +365,7 @@ def rollback(service_id, timeout=60):
       print("Rolling back take to much time! Check Rancher UI for more details.")
       sys.exit(1)
    else:
-      print("Rolled back")
+      print("Rolled back")  
 
 #
 # Script's entry point, starts Baker to execute the commands.
