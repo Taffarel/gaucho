@@ -6,6 +6,7 @@ import sys
 import time
 import websocket
 import base64
+import asyncio
 from BaseHTTPServer import HTTPServer
 
 HOST = "http://rancher.local:8080/v1"
@@ -34,9 +35,16 @@ def ws(url):
   webS.close()
   return resp
 
+# Logging Websocket
+async def logging(url):
+    async with websockets.connect(url) as websocket:
+        logging = await websocket.recv()
+        print("> {}".format(logging))
+
+
 # Helper
 def print_json(data):
-   print json.dumps(data, sort_keys=True, indent=3, separators=(',', ': '))
+   print(json.dumps(data, sort_keys=True, indent=3, separators=(',', ': ')))
 
 
 #
@@ -273,6 +281,45 @@ def execute(service_id,command):
 
   # call websocket and print answer
   print "> \n%s" % ws(ws_url)
+
+  print "DONE"
+
+
+
+#
+# Log of a container.
+#
+@baker.command(params={
+                        "service_id": "The ID of the service to show the log",
+                      })
+def logs(service_id):
+  """Execute remote command
+
+  Executes a command on one container of the service you specified.
+  """
+
+  # Get the array of containers
+  containers = get(HOST + URL_SERVICE + service_id + "/instances").json()['data']
+
+  # guard we have at least one container available
+  if len(containers) <= 0:
+    print "No container available"
+    sys.exit(1)
+
+  # take the first (random) container to show the logs
+  execution_url = containers[0]['actions']['logs']
+  print "Showing logs of container '%s'" % (containers[0]['name'])
+
+  # prepare post payload
+  payload = json.loads('{"follow": true,"lines": 100}')
+
+  # call logs action -> returns token and url for websocket access
+  intermediate = post(execution_url,payload)
+
+  ws_token = intermediate['token']
+  ws_url = intermediate['url'] + "?token=" + ws_token
+
+  logging(ws_url)
 
   print "DONE"
 
