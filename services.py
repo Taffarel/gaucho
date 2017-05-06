@@ -318,7 +318,9 @@ def logs(service_id):
   ws_token = intermediate['token']
   ws_url = intermediate['url'] + "?token=" + ws_token
 
-  logging(ws_url)
+  loop = asyncio.get_event_loop()
+  loop.run_until_complete(logging(ws_url))
+  loop.close()
 
   print("DONE")
 
