@@ -310,7 +310,7 @@ def logs(service_id):
   print("Showing logs of container '%s'" % (containers[0]['name']))
 
   # prepare post payload
-  payload = json.loads('{"follow": true,"lines": 100}')
+  payload = json.loads('{"follow": true,"lines": 1000}')
 
   # call logs action -> returns token and url for websocket access
   intermediate = post(execution_url,payload)
