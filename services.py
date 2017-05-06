@@ -320,7 +320,6 @@ def logs(service_id):
 
   loop = asyncio.get_event_loop()
   loop.run_until_complete(logging(ws_url))
-  loop.close()
 
   print("DONE")
 
