@@ -111,6 +111,25 @@ def get_list_of_services(rancher_service):
     }
 
     return services
+
+
+@baker.command(params={"name":"The name of service to list properties"})
+def list_tags_by_service(name=""):
+
+    service = get(HOST + "/services?name=" + name).json()
+    return print_json([get_tags_of_services(rancher_service) for rancher_service in service['data'] if rancher_service['kind'] != "loadBalancerService"])
+
+
+def get_tags_of_services(rancher_service):
+    services = {
+        'name':str(rancher_service['name']),
+        'state':str(rancher_service['state']),
+        'git_tag':str(rancher_service['data']['fields']['launchConfig']['environment']['GIT_TAG']),
+        'git_repo': str(rancher_service['data']['fields']['launchConfig']['environment']['REPO'])
+    }
+
+    return services
+
 #
 # Start containers within a service (e.g. for Start Once containers).
 #
